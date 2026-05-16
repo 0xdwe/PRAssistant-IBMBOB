@@ -1,0 +1,30 @@
+{
+  "$schema": "../packages/shared/src/config-schema.json",
+  "llm": {
+    "provider": "none"
+  },
+  "output": {
+    "file": ".pr-ready.md",
+    "clipboard": true
+  },
+  "test": {
+    "command": "npm test",
+    "timeout": 300000,
+    "patterns": [
+      "**/*.test.ts",
+      "**/*.test.js",
+      "**/*.spec.ts",
+      "**/*.spec.js"
+    ]
+  },
+  "risks": {
+    "patterns": [
+      "**/migrations/**",
+      "**/auth/**",
+      "**/*.config.js",
+      "**/*.config.ts",
+      "**/package.json",
+      "**/package-lock.json"
+    ]
+  }
+}

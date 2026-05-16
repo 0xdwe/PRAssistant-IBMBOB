@@ -3,27 +3,50 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { GitDiffExtractor } from './git-diff-extractor';
-import { RuleBasedAnalyzer } from './rule-based-analyzer';
+import { HybridAnalyzer } from './hybrid-analyzer';
 import { PRPacketGenerator } from './pr-packet-generator';
 import { OutputHandler } from './output-handler';
 import { ConfigManager } from './config-manager';
+<<<<<<< HEAD
 import { OpenAIProvider } from './openai-provider';
 import { LLMConfig } from '@pr-ready/shared';
+=======
+import { TestExecutor } from './test-executor';
+import { MonorepoDetector } from './monorepo-detector';
+import { TestResult, MonorepoDetection } from '@pr-ready/shared';
+>>>>>>> ca3a4f3 (feat: implement monorepo detection (issue 014))
 
 const program = new Command();
 
 program
   .name('pr-ready')
-  .description('Automated PR readiness analysis tool')
+  .description('Automated PR readiness analysis tool - Generate comprehensive PR packets from git diffs')
   .version('0.1.0')
-  .option('--base <branch>', 'Base branch to compare against (default: auto-detect)')
-  .option('--head <branch>', 'Head branch with changes (default: current)')
-  .option('--llm <provider>', 'LLM provider: openai|anthropic|ollama|none (default: none)')
-  .option('--test', 'Run tests and include results')
-  .option('--no-cache', 'Skip cache lookup')
-  .option('--config <path>', 'Custom config file path')
-  .option('--output <path>', 'Custom output file path')
-  .option('--no-clipboard', 'Skip clipboard copy')
+  .option('--base <branch>', 'Base branch to compare against (default: auto-detect from upstream/origin)')
+  .option('--head <branch>', 'Head branch with changes (default: current branch)')
+  .option('--llm <provider>', 'LLM provider for enhanced analysis: openai|anthropic|ollama|none (default: none)')
+  .option('--test', 'Run tests before generating PR packet and include test results')
+  .option('--no-cache', 'Skip cache lookup and force fresh analysis')
+  .option('--config <path>', 'Path to custom config file (.pr-ready.json or package.json)')
+  .option('--output <path>', 'Custom output file path (default: .pr-ready.md)')
+  .option('--no-clipboard', 'Skip automatic clipboard copy of the generated PR packet')
+  .addHelpText('after', `
+Examples:
+  $ pr-ready                              # Analyze current branch
+  $ pr-ready --base main --head feature   # Compare specific branches
+  $ pr-ready --test                       # Run tests and include results
+  $ pr-ready --llm openai                 # Use OpenAI for enhanced analysis
+  $ pr-ready --output my-pr.md            # Custom output file
+  $ pr-ready --no-clipboard               # Don't copy to clipboard
+
+Configuration:
+  Create .pr-ready.json or add "prReady" section to package.json
+  See examples/ directory for sample configurations
+
+Documentation:
+  Full documentation: https://github.com/yourusername/pr-ready
+  Issues & support: https://github.com/yourusername/pr-ready/issues
+`)
   .action(async (options) => {
     try {
       console.log(chalk.blue('🔍 Analyzing PR readiness...\n'));
@@ -51,15 +74,25 @@ program
 
       console.log(chalk.green(`✓ Found ${diff.files.length} changed file(s)\n`));
 
-      // Analyze with rule-based analyzer
+      // Analyze with hybrid analyzer (rule-based + optional LLM)
       console.log(chalk.gray('Analyzing changes...'));
-      const analyzer = new RuleBasedAnalyzer();
-      const analysis = analyzer.analyze(diff);
+      const useCache = options.cache !== false; // --no-cache sets cache to false
+      const analyzer = new HybridAnalyzer(config, useCache);
+      const analysis = await analyzer.analyze(diff);
 
       console.log(chalk.green(`✓ Categorized into ${analysis.categories.length} categories`));
       console.log(chalk.green(`✓ Detected ${analysis.testDetection.testFiles.length} test file(s)`));
-      console.log(chalk.green(`✓ Found ${analysis.risks.length} risk flag(s)\n`));
+      console.log(chalk.green(`✓ Found ${analysis.risks.length} risk flag(s)`));
+      
+      if (analysis.llmAnalysis) {
+        console.log(chalk.green(`✓ LLM analysis included\n`));
+      } else if (analysis.llmError) {
+        console.log(chalk.yellow(`⚠️  LLM analysis failed: ${analysis.llmError}\n`));
+      } else {
+        console.log(chalk.gray('(LLM analysis not enabled)\n'));
+      }
 
+<<<<<<< HEAD
       // LLM analysis if enabled
       let llmAnalysis = null;
       if (config.llm?.provider && config.llm.provider !== 'none') {
@@ -88,13 +121,61 @@ program
             console.log(chalk.yellow('⚠️  LLM analysis failed with unknown error\n'));
           }
         }
+=======
+      // Detect monorepo structure
+      console.log(chalk.gray('Detecting monorepo structure...'));
+      const monorepoDetector = new MonorepoDetector(process.cwd(), config);
+      const changedFilePaths = diff.files.map(f => f.path);
+      const monorepoDetection = await monorepoDetector.detectAffectedPackages(changedFilePaths);
+      
+      if (monorepoDetection.isMonorepo && monorepoDetection.affectedPackages.length > 0) {
+        console.log(chalk.green(`✓ Detected ${monorepoDetection.type} monorepo`));
+        console.log(chalk.green(`✓ Affected packages: ${monorepoDetection.affectedPackages.join(', ')}\n`));
+      } else if (monorepoDetection.isMonorepo) {
+        console.log(chalk.green(`✓ Detected ${monorepoDetection.type} monorepo (no packages affected)\n`));
+      } else {
+        console.log(chalk.gray('✓ Not a monorepo\n'));
+      }
+
+      // Run tests if --test flag is provided
+      let testResults: TestResult | undefined;
+      if (options.test) {
+        console.log(chalk.gray('Running tests...'));
+        try {
+          const testExecutor = new TestExecutor();
+          const testCommand = config.test?.command || 'npm test';
+          const testTimeout = config.test?.timeout || 300000;
+          
+          testResults = await testExecutor.executeTests(testCommand, testTimeout);
+          
+          if (testResults.passed) {
+            console.log(chalk.green(`✓ All tests passed (${testResults.passedTests}/${testResults.totalTests})`));
+          } else {
+            console.log(chalk.red(`✗ Tests failed (${testResults.failedTests}/${testResults.totalTests} failed)`));
+          }
+        } catch (error) {
+          console.error(chalk.red(`✗ Test execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`));
+          if (!options.force) {
+            process.exit(1);
+          }
+        }
+        console.log('');
+>>>>>>> ca3a4f3 (feat: implement monorepo detection (issue 014))
       }
 
       // Generate PR packet
       console.log(chalk.gray('Generating PR packet...'));
       const generator = new PRPacketGenerator();
+<<<<<<< HEAD
       const packet = generator.generate(diff, analysis, llmAnalysis);
+=======
+      const packet = generator.generate(diff, analysis, testResults, monorepoDetection);
+<<<<<<< HEAD
+>>>>>>> ca3a4f3 (feat: implement monorepo detection (issue 014))
       const markdown = generator.generateMarkdown(packet);
+=======
+      const markdown = generator.generateMarkdown(packet, analysis);
+>>>>>>> 486204d (feat: implement PR Readiness Assistant (all 20 issues))
 
       console.log(chalk.green('✓ PR packet generated\n'));
 
@@ -116,6 +197,12 @@ program
       const highRisks = analysis.risks.filter(r => r.level === 'high');
       if (highRisks.length > 0) {
         console.log(chalk.yellow(`\n⚠️  Warning: ${highRisks.length} high-risk change(s) detected`));
+      }
+
+      // Exit with error if tests failed
+      if (testResults && !testResults.passed) {
+        console.log(chalk.red('\n❌ Tests failed. Please fix failing tests before submitting PR.'));
+        process.exit(1);
       }
 
     } catch (error) {

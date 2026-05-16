@@ -14,12 +14,20 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.96.0",
     "@pr-ready/shared": "^0.1.0",
     "chalk": "^4.1.2",
     "clipboardy": "^4.0.0",
     "commander": "^11.1.0",
+<<<<<<< HEAD
     "openai": "^6.38.0",
     "simple-git": "^3.21.0"
+=======
+    "glob": "^13.0.6",
+    "openai": "^6.38.0",
+    "simple-git": "^3.21.0",
+    "yaml": "^2.9.0"
+>>>>>>> ca3a4f3 (feat: implement monorepo detection (issue 014))
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

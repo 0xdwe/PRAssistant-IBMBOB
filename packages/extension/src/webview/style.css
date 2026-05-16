@@ -1,0 +1,347 @@
+/* VS Code Theme Variables */
+:root {
+  --container-padding: 20px;
+  --section-spacing: 16px;
+  --border-radius: 4px;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  color: var(--vscode-foreground);
+  background-color: var(--vscode-sideBar-background);
+}
+
+#app {
+  padding: var(--container-padding);
+}
+
+/* State Containers */
+.state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  min-height: 300px;
+}
+
+.state-container .icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.state-container h2 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--vscode-foreground);
+}
+
+.state-container p {
+  margin: 0 0 20px 0;
+  color: var(--vscode-descriptionForeground);
+  max-width: 300px;
+}
+
+/* Buttons */
+.action-button {
+  background-color: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 13px;
+  font-family: var(--vscode-font-family);
+}
+
+.action-button:hover {
+  background-color: var(--vscode-button-hoverBackground);
+}
+
+.copy-button {
+  background-color: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  border: none;
+  padding: 4px 12px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--vscode-font-family);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.copy-button:hover {
+  background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+.copy-button .icon {
+  font-size: 14px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.copy-all {
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+/* Sections */
+.section {
+  margin-bottom: var(--section-spacing);
+  background-color: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: var(--vscode-sideBarSectionHeader-background);
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--vscode-sideBarSectionHeader-foreground);
+}
+
+.section-content {
+  padding: 16px;
+  line-height: 1.6;
+}
+
+/* Metadata */
+.metadata {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.metadata-item {
+  display: flex;
+  gap: 8px;
+}
+
+.metadata-label {
+  font-weight: 600;
+  color: var(--vscode-foreground);
+  min-width: 120px;
+}
+
+.metadata-value {
+  color: var(--vscode-descriptionForeground);
+}
+
+/* File Categories */
+.file-category {
+  margin-bottom: 16px;
+}
+
+.file-category:last-child {
+  margin-bottom: 0;
+}
+
+.category-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--vscode-foreground);
+}
+
+.file-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.file-list li {
+  padding: 4px 0 4px 16px;
+  position: relative;
+  color: var(--vscode-descriptionForeground);
+  font-family: var(--vscode-editor-font-family);
+  font-size: 12px;
+}
+
+.file-list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--vscode-descriptionForeground);
+}
+
+/* Test Status */
+.test-status {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-icon {
+  font-size: 16px;
+}
+
+.status-label {
+  font-weight: 600;
+  color: var(--vscode-foreground);
+}
+
+.status-value {
+  color: var(--vscode-descriptionForeground);
+}
+
+/* Risk Flags */
+.risk-item {
+  margin-bottom: 16px;
+  padding: 12px;
+  border-left: 3px solid;
+  background-color: var(--vscode-inputValidation-warningBackground);
+}
+
+.risk-item:last-child {
+  margin-bottom: 0;
+}
+
+.risk-item.high {
+  border-left-color: var(--vscode-inputValidation-errorBorder);
+  background-color: var(--vscode-inputValidation-errorBackground);
+}
+
+.risk-item.medium {
+  border-left-color: var(--vscode-inputValidation-warningBorder);
+  background-color: var(--vscode-inputValidation-warningBackground);
+}
+
+.risk-item.low {
+  border-left-color: var(--vscode-inputValidation-infoBorder);
+  background-color: var(--vscode-inputValidation-infoBackground);
+}
+
+.risk-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.risk-detail {
+  margin: 4px 0;
+  font-size: 12px;
+}
+
+.risk-label {
+  font-weight: 600;
+  color: var(--vscode-foreground);
+}
+
+/* Checklist */
+.checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.checklist li {
+  padding: 8px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.checklist li:last-child {
+  border-bottom: none;
+}
+
+.checklist li::before {
+  content: "☐";
+  font-size: 16px;
+  color: var(--vscode-descriptionForeground);
+  flex-shrink: 0;
+}
+
+/* Code Blocks */
+code {
+  font-family: var(--vscode-editor-font-family);
+  font-size: 12px;
+  background-color: var(--vscode-textCodeBlock-background);
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: var(--vscode-textPreformat-foreground);
+}
+
+pre {
+  font-family: var(--vscode-editor-font-family);
+  font-size: 12px;
+  background-color: var(--vscode-textCodeBlock-background);
+  padding: 12px;
+  border-radius: var(--border-radius);
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+/* Empty State for Sections */
+.empty-section {
+  color: var(--vscode-descriptionForeground);
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--vscode-scrollbarSlider-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--vscode-scrollbarSlider-hoverBackground);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--vscode-scrollbarSlider-activeBackground);
+}
+
+/* Made with Bob */
