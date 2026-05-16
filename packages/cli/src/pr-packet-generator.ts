@@ -1,16 +1,23 @@
-import { RuleAnalysis, PRPacket, GitDiff } from '@pr-ready/shared';
+import { RuleAnalysis, PRPacket, GitDiff, TestResult, MonorepoDetection } from '@pr-ready/shared';
 
 export class PRPacketGenerator {
-  generate(diff: GitDiff, analysis: RuleAnalysis): PRPacket {
-    const summary = this.generateSummary(diff, analysis);
+  generate(
+    diff: GitDiff,
+    analysis: RuleAnalysis,
+    testResults?: TestResult,
+    monorepo?: MonorepoDetection
+  ): PRPacket {
+    const summary = this.generateSummary(diff, analysis, monorepo);
     const checklist = this.generateChecklist(analysis);
 
     return {
       summary,
       filesChanged: analysis.categories,
       testStatus: analysis.testDetection,
+      testResults,
       risks: analysis.risks,
       checklist,
+      monorepo,
       metadata: {
         baseBranch: diff.baseBranch,
         headBranch: diff.headBranch,
@@ -39,6 +46,11 @@ export class PRPacketGenerator {
     sections.push(`- **Files Changed**: ${packet.metadata.totalFiles}`);
     sections.push(`- **Total Changes**: +${packet.metadata.totalChanges} lines`);
     sections.push(`- **Generated**: ${new Date(packet.metadata.generatedAt).toLocaleString()}`);
+    
+    // Monorepo info
+    if (packet.monorepo?.isMonorepo && packet.monorepo.affectedPackages.length > 0) {
+      sections.push(`- **Affected Packages**: ${packet.monorepo.affectedPackages.join(', ')}`);
+    }
     sections.push('');
 
     // Files by Category
@@ -68,6 +80,33 @@ export class PRPacketGenerator {
       sections.push('Please ensure appropriate tests are added or updated.\n');
     } else {
       sections.push('ℹ️ No source code changes detected (config/docs only)\n');
+    }
+
+    // Test Execution Results
+    if (packet.testResults) {
+      sections.push('## Test Execution Results\n');
+      if (packet.testResults.passed) {
+        sections.push(`✅ **All tests passed**\n`);
+        sections.push(`- Total: ${packet.testResults.totalTests} test(s)`);
+        sections.push(`- Passed: ${packet.testResults.passedTests}`);
+        if (packet.testResults.skippedTests) {
+          sections.push(`- Skipped: ${packet.testResults.skippedTests}`);
+        }
+        sections.push(`- Duration: ${(packet.testResults.duration / 1000).toFixed(2)}s`);
+      } else {
+        sections.push(`❌ **Tests failed**\n`);
+        sections.push(`- Total: ${packet.testResults.totalTests} test(s)`);
+        sections.push(`- Passed: ${packet.testResults.passedTests}`);
+        sections.push(`- Failed: ${packet.testResults.failedTests}`);
+        if (packet.testResults.skippedTests) {
+          sections.push(`- Skipped: ${packet.testResults.skippedTests}`);
+        }
+        sections.push(`- Duration: ${(packet.testResults.duration / 1000).toFixed(2)}s`);
+        if (packet.testResults.error) {
+          sections.push(`\n**Error**: ${packet.testResults.error}`);
+        }
+      }
+      sections.push('');
     }
 
     // Risk Flags
@@ -114,11 +153,16 @@ export class PRPacketGenerator {
     return sections.join('\n');
   }
 
-  private generateSummary(diff: GitDiff, analysis: RuleAnalysis): string {
+  private generateSummary(diff: GitDiff, analysis: RuleAnalysis, monorepo?: MonorepoDetection): string {
     const parts: string[] = [];
 
     // Basic stats
     parts.push(`This PR modifies **${diff.files.length} file(s)** across **${analysis.categories.length} categor${analysis.categories.length === 1 ? 'y' : 'ies'}**.`);
+
+    // Monorepo info
+    if (monorepo?.isMonorepo && monorepo.affectedPackages.length > 0) {
+      parts.push(`Affects **${monorepo.affectedPackages.length} package(s)**: ${monorepo.affectedPackages.join(', ')}.`);
+    }
 
     // Category breakdown
     const categoryNames = analysis.categories.map(c => `${c.name} (${c.count})`).join(', ');

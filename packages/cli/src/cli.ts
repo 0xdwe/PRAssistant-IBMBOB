@@ -7,6 +7,9 @@ import { RuleBasedAnalyzer } from './rule-based-analyzer';
 import { PRPacketGenerator } from './pr-packet-generator';
 import { OutputHandler } from './output-handler';
 import { ConfigManager } from './config-manager';
+import { TestExecutor } from './test-executor';
+import { MonorepoDetector } from './monorepo-detector';
+import { TestResult, MonorepoDetection } from '@pr-ready/shared';
 
 const program = new Command();
 
@@ -58,10 +61,50 @@ program
       console.log(chalk.green(`✓ Detected ${analysis.testDetection.testFiles.length} test file(s)`));
       console.log(chalk.green(`✓ Found ${analysis.risks.length} risk flag(s)\n`));
 
+      // Detect monorepo structure
+      console.log(chalk.gray('Detecting monorepo structure...'));
+      const monorepoDetector = new MonorepoDetector(process.cwd(), config);
+      const changedFilePaths = diff.files.map(f => f.path);
+      const monorepoDetection = await monorepoDetector.detectAffectedPackages(changedFilePaths);
+      
+      if (monorepoDetection.isMonorepo && monorepoDetection.affectedPackages.length > 0) {
+        console.log(chalk.green(`✓ Detected ${monorepoDetection.type} monorepo`));
+        console.log(chalk.green(`✓ Affected packages: ${monorepoDetection.affectedPackages.join(', ')}\n`));
+      } else if (monorepoDetection.isMonorepo) {
+        console.log(chalk.green(`✓ Detected ${monorepoDetection.type} monorepo (no packages affected)\n`));
+      } else {
+        console.log(chalk.gray('✓ Not a monorepo\n'));
+      }
+
+      // Run tests if --test flag is provided
+      let testResults: TestResult | undefined;
+      if (options.test) {
+        console.log(chalk.gray('Running tests...'));
+        try {
+          const testExecutor = new TestExecutor();
+          const testCommand = config.test?.command || 'npm test';
+          const testTimeout = config.test?.timeout || 300000;
+          
+          testResults = await testExecutor.executeTests(testCommand, testTimeout);
+          
+          if (testResults.passed) {
+            console.log(chalk.green(`✓ All tests passed (${testResults.passedTests}/${testResults.totalTests})`));
+          } else {
+            console.log(chalk.red(`✗ Tests failed (${testResults.failedTests}/${testResults.totalTests} failed)`));
+          }
+        } catch (error) {
+          console.error(chalk.red(`✗ Test execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`));
+          if (!options.force) {
+            process.exit(1);
+          }
+        }
+        console.log('');
+      }
+
       // Generate PR packet
       console.log(chalk.gray('Generating PR packet...'));
       const generator = new PRPacketGenerator();
-      const packet = generator.generate(diff, analysis);
+      const packet = generator.generate(diff, analysis, testResults, monorepoDetection);
       const markdown = generator.generateMarkdown(packet);
 
       console.log(chalk.green('✓ PR packet generated\n'));
@@ -84,6 +127,12 @@ program
       const highRisks = analysis.risks.filter(r => r.level === 'high');
       if (highRisks.length > 0) {
         console.log(chalk.yellow(`\n⚠️  Warning: ${highRisks.length} high-risk change(s) detected`));
+      }
+
+      // Exit with error if tests failed
+      if (testResults && !testResults.passed) {
+        console.log(chalk.red('\n❌ Tests failed. Please fix failing tests before submitting PR.'));
+        process.exit(1);
       }
 
     } catch (error) {
