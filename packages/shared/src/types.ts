@@ -91,6 +91,7 @@ export interface Config {
     baseURL?: string;
     apiKey?: string;
     model?: string;
+    endpoint?: string; // For Ollama custom endpoint
   };
   test?: {
     command?: string;
@@ -132,7 +133,11 @@ export interface LLMAnalysis {
   insights: string[];
   keyChanges: string[];
   suggestedReviewers?: string[];
+<<<<<<< HEAD
 >>>>>>> ca3a4f3 (feat: implement monorepo detection (issue 014))
+=======
+  checklistItems?: string[]; // 2-4 context-specific checklist items
+>>>>>>> 486204d (feat: implement PR Readiness Assistant (all 20 issues))
 }
 
 export interface LLMProvider {
@@ -148,6 +153,11 @@ export interface LLMConfig {
   timeout?: number;
 =======
   isConfigured(): boolean;
+}
+
+export interface HybridAnalysis extends RuleAnalysis {
+  llmAnalysis?: LLMAnalysis;
+  llmError?: string;
 }
 
 export interface MonorepoPackage {

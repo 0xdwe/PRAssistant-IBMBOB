@@ -8,16 +8,31 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces",
+<<<<<<< HEAD
     "test": "npm run test --workspaces",
     "test:watch": "npm run test:watch -w @pr-ready/cli",
     "test:coverage": "jest --coverage",
     "dev": "npm run dev -w @pr-ready/cli"
+=======
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "dev": "npm run dev -w @pr-ready/cli",
+    "prepare": "husky install",
+    "lint": "npm run lint --workspaces"
+>>>>>>> 486204d (feat: implement PR Readiness Assistant (all 20 issues))
   },
   "devDependencies": {
     "@jest/globals": "^30.4.1",
     "@types/jest": "^30.0.0",
     "@types/node": "^20.0.0",
+<<<<<<< HEAD
     "jest": "^30.4.2",
+=======
+    "husky": "^9.1.7",
+    "jest": "^30.4.2",
+    "lint-staged": "^17.0.4",
+>>>>>>> 486204d (feat: implement PR Readiness Assistant (all 20 issues))
     "memfs": "^4.57.2",
     "nock": "^14.0.15",
     "ts-jest": "^29.4.9",

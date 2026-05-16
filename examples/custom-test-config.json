@@ -1,0 +1,58 @@
+{
+  "$schema": "../packages/shared/src/config-schema.json",
+  "llm": {
+    "provider": "none"
+  },
+  "output": {
+    "file": ".pr-ready.md",
+    "clipboard": true
+  },
+  "test": {
+    "command": "pnpm test:ci",
+    "timeout": 900000,
+    "patterns": [
+      "**/__tests__/**/*.ts",
+      "**/__tests__/**/*.tsx",
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.spec.ts",
+      "**/*.spec.tsx"
+    ],
+    "excludePatterns": [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/.next/**"
+    ],
+    "coverage": {
+      "enabled": true,
+      "threshold": 80
+    }
+  },
+  "risks": {
+    "patterns": [
+      "**/migrations/**",
+      "**/db/**",
+      "**/auth/**",
+      "**/security/**",
+      "**/*.config.js",
+      "**/*.config.ts",
+      "**/package.json",
+      "**/Dockerfile",
+      "**/.github/workflows/**",
+      "**/terraform/**"
+    ],
+    "customRules": [
+      {
+        "pattern": "**/api/**",
+        "level": "medium",
+        "message": "API endpoint changes require careful review"
+      },
+      {
+        "pattern": "**/schema.prisma",
+        "level": "high",
+        "message": "Database schema changes - ensure migrations are included"
+      }
+    ]
+  }
+}
