@@ -53,11 +53,7 @@ export interface PRPacket {
   testResults?: TestResult;
   risks: RiskFlag[];
   checklist: string[];
-<<<<<<< HEAD
-  llmAnalysis?: LLMAnalysis;
-=======
   monorepo?: MonorepoDetection;
->>>>>>> ca3a4f3 (feat: implement monorepo detection (issue 014))
   metadata: {
     baseBranch: string;
     headBranch: string;
@@ -111,12 +107,6 @@ export interface Config {
   };
 }
 
-<<<<<<< HEAD
-export interface LLMAnalysis {
-  summary: string;
-  insights: string[];
-  suggestions?: string[];
-=======
 export interface TestResult {
   passed: boolean;
   totalTests: number;
@@ -133,25 +123,11 @@ export interface LLMAnalysis {
   insights: string[];
   keyChanges: string[];
   suggestedReviewers?: string[];
-<<<<<<< HEAD
->>>>>>> ca3a4f3 (feat: implement monorepo detection (issue 014))
-=======
   checklistItems?: string[]; // 2-4 context-specific checklist items
->>>>>>> 486204d (feat: implement PR Readiness Assistant (all 20 issues))
 }
 
 export interface LLMProvider {
   analyze(diff: GitDiff): Promise<LLMAnalysis>;
-<<<<<<< HEAD
-}
-
-export interface LLMConfig {
-  provider: 'openai' | 'anthropic' | 'ollama' | 'none';
-  baseURL?: string;
-  apiKey?: string;
-  model?: string;
-  timeout?: number;
-=======
   isConfigured(): boolean;
 }
 
@@ -171,7 +147,6 @@ export interface MonorepoDetection {
   type?: 'npm-workspaces' | 'lerna' | 'nx' | 'pnpm' | 'yarn';
   packages: MonorepoPackage[];
   affectedPackages: string[];
->>>>>>> ca3a4f3 (feat: implement monorepo detection (issue 014))
 }
 
 // Made with Bob

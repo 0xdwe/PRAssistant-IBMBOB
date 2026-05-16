@@ -1,3 +1,4 @@
+
 import { GitDiff, RuleAnalysis, FileCategory, TestDetection, RiskFlag } from '@pr-ready/shared';
 
 export class RuleBasedAnalyzer {
@@ -171,11 +172,7 @@ export class RuleBasedAnalyzer {
     const path = filePath.toLowerCase();
 
     // High risk: Database migrations
-<<<<<<< HEAD
-    if (path.includes('migrations/') || path.includes('schema/') || path.includes('/migrations/') || path.includes('/schema/')) {
-=======
     if (path.includes('migrations/') || path.includes('schema/')) {
->>>>>>> 486204d (feat: implement PR Readiness Assistant (all 20 issues))
       risks.push({
         level: 'high',
         file: filePath,
@@ -251,5 +248,3 @@ export class RuleBasedAnalyzer {
     return risks;
   }
 }
-
-// Made with Bob

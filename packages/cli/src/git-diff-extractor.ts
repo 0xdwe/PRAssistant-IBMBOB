@@ -1,3 +1,4 @@
+
 import simpleGit, { SimpleGit, DiffResult } from 'simple-git';
 import { GitDiff, DiffFile, DiffOptions } from '@pr-ready/shared';
 
@@ -20,24 +21,48 @@ export class GitDiffExtractor {
       throw new Error('Not a git repository. Please run this command from within a git repository.');
     }
 
-    // Get current branch if head not specified
-    const headBranch = options.headBranch || await this.getCurrentBranch();
+    // Check if we should analyze uncommitted changes (when no branches specified)
+    const analyzeUncommitted = !options.baseBranch && !options.headBranch;
     
-    // Auto-detect base branch if not specified
-    const baseBranch = options.baseBranch || await this.detectUpstreamBranch();
+    let diffSummary;
+    let baseBranch: string;
+    let headBranch: string;
+    
+    if (analyzeUncommitted) {
+      // Get uncommitted changes (staged + unstaged)
+      diffSummary = await this.git.diffSummary(['HEAD']);
+      baseBranch = 'HEAD';
+      headBranch = 'Working Directory';
+      
+      // If no changes in diff, check for untracked files
+      if (diffSummary.files.length === 0) {
+        const status = await this.git.status();
+        if (status.not_added.length === 0 && status.modified.length === 0 && status.created.length === 0) {
+          throw new Error('No uncommitted changes found. Make some changes or commit your work first.');
+        }
+      }
+    } else {
+      // Get current branch if head not specified
+      headBranch = options.headBranch || await this.getCurrentBranch();
+      
+      // Auto-detect base branch if not specified
+      baseBranch = options.baseBranch || await this.detectUpstreamBranch();
 
-    // Get diff between branches
-    const diffSummary = await this.git.diffSummary([baseBranch, headBranch]);
-    
-    if (diffSummary.files.length === 0) {
-      throw new Error(`No differences found between ${baseBranch} and ${headBranch}`);
+      // Get diff between branches
+      diffSummary = await this.git.diffSummary([baseBranch, headBranch]);
+      
+      if (diffSummary.files.length === 0) {
+        throw new Error(`No differences found between ${baseBranch} and ${headBranch}`);
+      }
     }
 
     // Get detailed diff for each file
     const files: DiffFile[] = [];
     
     for (const file of diffSummary.files) {
-      const fileDiff = await this.git.diff([baseBranch, headBranch, '--', file.file]);
+      const fileDiff = analyzeUncommitted
+        ? await this.git.diff(['HEAD', '--', file.file])
+        : await this.git.diff([baseBranch, headBranch, '--', file.file]);
       
       // Handle different file types from simple-git
       const insertions = 'insertions' in file ? file.insertions : 0;
@@ -118,5 +143,3 @@ export class GitDiffExtractor {
     }
   }
 }
-
-// Made with Bob

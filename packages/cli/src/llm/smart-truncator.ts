@@ -1,3 +1,4 @@
+
 import { GitDiff, DiffFile } from '@pr-ready/shared';
 
 export interface TruncationResult {
@@ -345,5 +346,3 @@ export class SmartTruncator {
     return lines.join('\n');
   }
 }
-
-// Made with Bob

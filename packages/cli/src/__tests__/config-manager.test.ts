@@ -1,3 +1,4 @@
+
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { ConfigManager } from '../config-manager';
 import { vol } from 'memfs';
@@ -261,5 +262,3 @@ describe('ConfigManager', () => {
     });
   });
 });
-
-// Made with Bob

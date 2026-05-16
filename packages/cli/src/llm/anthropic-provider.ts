@@ -1,3 +1,4 @@
+
 import Anthropic from '@anthropic-ai/sdk';
 import { GitDiff, LLMProvider, LLMAnalysis } from '@pr-ready/shared';
 import { SmartTruncator } from './smart-truncator';
@@ -184,5 +185,3 @@ CHECKLIST:
     throw new Error(`Anthropic API error: ${error.message || 'Unknown error'}`);
   }
 }
-
-// Made with Bob

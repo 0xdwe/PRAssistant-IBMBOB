@@ -1,3 +1,4 @@
+
 import { GitDiff, HybridAnalysis, LLMProvider, Config } from '@pr-ready/shared';
 import { RuleBasedAnalyzer } from './rule-based-analyzer';
 import { OpenAIProvider } from './llm/openai-provider';
@@ -138,5 +139,3 @@ export class HybridAnalyzer {
     return this.llmProvider !== null && this.llmProvider.isConfigured();
   }
 }
-
-// Made with Bob

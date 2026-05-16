@@ -1,3 +1,4 @@
+
 import { execSync } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -48,5 +49,3 @@ describe('E2E: CLI Integration', () => {
     fs.unlinkSync(outputFile);
   }, 30000);
 });
-
-// Made with Bob

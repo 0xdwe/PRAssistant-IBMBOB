@@ -1,3 +1,4 @@
+
 import OpenAI from 'openai';
 import { GitDiff, LLMProvider, LLMAnalysis } from '@pr-ready/shared';
 import { SmartTruncator } from './smart-truncator';
@@ -187,5 +188,3 @@ CHECKLIST:
     throw new Error(`OpenAI API error: ${error.message || 'Unknown error'}`);
   }
 }
-
-// Made with Bob

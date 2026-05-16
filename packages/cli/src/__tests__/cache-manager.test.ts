@@ -1,3 +1,4 @@
+
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { CacheManager } from '../cache-manager';
 import { GitDiff, LLMAnalysis, Config } from '@pr-ready/shared';
@@ -186,5 +187,3 @@ describe('CacheManager', () => {
     });
   });
 });
-
-// Made with Bob

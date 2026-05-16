@@ -1,3 +1,4 @@
+
 import { GitDiff, LLMProvider, LLMAnalysis } from '@pr-ready/shared';
 import { SmartTruncator } from './smart-truncator';
 
@@ -266,5 +267,3 @@ CHECKLIST:
     throw new Error(`Ollama error: ${error.message || 'Unknown error'}`);
   }
 }
-
-// Made with Bob

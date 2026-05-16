@@ -1,3 +1,4 @@
+
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { OpenAIProvider } from '../openai-provider';
 import { GitDiff } from '@pr-ready/shared';
@@ -161,5 +162,3 @@ describe('OpenAIProvider', () => {
     });
   });
 });
-
-// Made with Bob

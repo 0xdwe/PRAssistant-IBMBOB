@@ -1,3 +1,4 @@
+
 #!/usr/bin/env node
 import { OpenAIProvider } from './openai-provider';
 import { GitDiff } from '@pr-ready/shared';
@@ -100,5 +101,3 @@ testOpenAIProvider().catch(error => {
   console.error('Unexpected error:', error);
   process.exit(1);
 });
-
-// Made with Bob

@@ -1,3 +1,4 @@
+
 #!/usr/bin/env node
 
 /**
@@ -102,5 +103,3 @@ testAnthropicProvider().catch(error => {
   console.error('Unexpected error:', error);
   process.exit(1);
 });
-
-// Made with Bob

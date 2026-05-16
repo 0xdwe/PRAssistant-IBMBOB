@@ -7,14 +7,9 @@ import { HybridAnalyzer } from './hybrid-analyzer';
 import { PRPacketGenerator } from './pr-packet-generator';
 import { OutputHandler } from './output-handler';
 import { ConfigManager } from './config-manager';
-<<<<<<< HEAD
-import { OpenAIProvider } from './openai-provider';
-import { LLMConfig } from '@pr-ready/shared';
-=======
 import { TestExecutor } from './test-executor';
 import { MonorepoDetector } from './monorepo-detector';
 import { TestResult, MonorepoDetection } from '@pr-ready/shared';
->>>>>>> ca3a4f3 (feat: implement monorepo detection (issue 014))
 
 const program = new Command();
 
@@ -92,36 +87,6 @@ Documentation:
         console.log(chalk.gray('(LLM analysis not enabled)\n'));
       }
 
-<<<<<<< HEAD
-      // LLM analysis if enabled
-      let llmAnalysis = null;
-      if (config.llm?.provider && config.llm.provider !== 'none') {
-        try {
-          console.log(chalk.gray(`Analyzing with ${config.llm.provider}...`));
-          
-          const llmConfig: LLMConfig = {
-            provider: config.llm.provider,
-            baseURL: config.llm.baseURL || 'https://rqhse4n.9router.com/v1',
-            apiKey: config.llm.apiKey,
-            model: config.llm.model || 'gpt-4',
-            timeout: 30000,
-          };
-
-          if (config.llm.provider === 'openai') {
-            const provider = new OpenAIProvider(llmConfig);
-            llmAnalysis = await provider.analyze(diff);
-            console.log(chalk.green('✓ LLM analysis complete\n'));
-          } else {
-            console.log(chalk.yellow(`⚠️  Provider '${config.llm.provider}' not yet implemented\n`));
-          }
-        } catch (error) {
-          if (error instanceof Error) {
-            console.log(chalk.yellow(`⚠️  LLM analysis failed: ${error.message}\n`));
-          } else {
-            console.log(chalk.yellow('⚠️  LLM analysis failed with unknown error\n'));
-          }
-        }
-=======
       // Detect monorepo structure
       console.log(chalk.gray('Detecting monorepo structure...'));
       const monorepoDetector = new MonorepoDetector(process.cwd(), config);
@@ -160,22 +125,13 @@ Documentation:
           }
         }
         console.log('');
->>>>>>> ca3a4f3 (feat: implement monorepo detection (issue 014))
       }
 
       // Generate PR packet
       console.log(chalk.gray('Generating PR packet...'));
       const generator = new PRPacketGenerator();
-<<<<<<< HEAD
-      const packet = generator.generate(diff, analysis, llmAnalysis);
-=======
       const packet = generator.generate(diff, analysis, testResults, monorepoDetection);
-<<<<<<< HEAD
->>>>>>> ca3a4f3 (feat: implement monorepo detection (issue 014))
-      const markdown = generator.generateMarkdown(packet);
-=======
       const markdown = generator.generateMarkdown(packet, analysis);
->>>>>>> 486204d (feat: implement PR Readiness Assistant (all 20 issues))
 
       console.log(chalk.green('✓ PR packet generated\n'));
 

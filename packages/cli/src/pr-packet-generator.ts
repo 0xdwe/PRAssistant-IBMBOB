@@ -1,15 +1,4 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-import { RuleAnalysis, PRPacket, GitDiff, LLMAnalysis } from '@pr-ready/shared';
-
-export class PRPacketGenerator {
-  generate(diff: GitDiff, analysis: RuleAnalysis, llmAnalysis?: LLMAnalysis | null): PRPacket {
-    const summary = this.generateSummary(diff, analysis, llmAnalysis);
-=======
-import { RuleAnalysis, PRPacket, GitDiff, TestResult, MonorepoDetection } from '@pr-ready/shared';
-=======
 import { RuleAnalysis, HybridAnalysis, PRPacket, GitDiff, TestResult, MonorepoDetection } from '@pr-ready/shared';
->>>>>>> 486204d (feat: implement PR Readiness Assistant (all 20 issues))
 
 export class PRPacketGenerator {
   generate(
@@ -19,13 +8,8 @@ export class PRPacketGenerator {
     monorepo?: MonorepoDetection
   ): PRPacket {
     const summary = this.generateSummary(diff, analysis, monorepo);
-<<<<<<< HEAD
->>>>>>> ca3a4f3 (feat: implement monorepo detection (issue 014))
-    const checklist = this.generateChecklist(analysis);
-=======
     const hybridAnalysis = 'llmAnalysis' in analysis ? analysis : undefined;
     const checklist = this.generateChecklist(analysis, hybridAnalysis);
->>>>>>> 486204d (feat: implement PR Readiness Assistant (all 20 issues))
 
     return {
       summary,
@@ -34,11 +18,7 @@ export class PRPacketGenerator {
       testResults,
       risks: analysis.risks,
       checklist,
-<<<<<<< HEAD
-      llmAnalysis: llmAnalysis || undefined,
-=======
       monorepo,
->>>>>>> ca3a4f3 (feat: implement monorepo detection (issue 014))
       metadata: {
         baseBranch: diff.baseBranch,
         headBranch: diff.headBranch,
@@ -84,29 +64,6 @@ export class PRPacketGenerator {
     sections.push('## Summary\n');
     sections.push(packet.summary);
     sections.push('');
-
-    // LLM Analysis (if available)
-    if (packet.llmAnalysis) {
-      sections.push('## AI Analysis\n');
-      sections.push(packet.llmAnalysis.summary);
-      sections.push('');
-      
-      if (packet.llmAnalysis.insights.length > 0) {
-        sections.push('### Key Insights\n');
-        for (const insight of packet.llmAnalysis.insights) {
-          sections.push(`- ${insight}`);
-        }
-        sections.push('');
-      }
-      
-      if (packet.llmAnalysis.suggestions && packet.llmAnalysis.suggestions.length > 0) {
-        sections.push('### Suggestions\n');
-        for (const suggestion of packet.llmAnalysis.suggestions) {
-          sections.push(`- ${suggestion}`);
-        }
-        sections.push('');
-      }
-    }
 
     // Metadata
     sections.push('## Change Details\n');
@@ -222,21 +179,8 @@ export class PRPacketGenerator {
     return sections.join('\n');
   }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-  private generateSummary(diff: GitDiff, analysis: RuleAnalysis, llmAnalysis?: LLMAnalysis | null): string {
-=======
-  private generateSummary(diff: GitDiff, analysis: RuleAnalysis, monorepo?: MonorepoDetection): string {
->>>>>>> ca3a4f3 (feat: implement monorepo detection (issue 014))
-=======
   private generateSummary(diff: GitDiff, analysis: RuleAnalysis | HybridAnalysis, monorepo?: MonorepoDetection): string {
->>>>>>> 486204d (feat: implement PR Readiness Assistant (all 20 issues))
     const parts: string[] = [];
-
-    // Use LLM summary if available, otherwise use rule-based
-    if (llmAnalysis?.summary) {
-      return llmAnalysis.summary;
-    }
 
     // Basic stats
     parts.push(`This PR modifies **${diff.files.length} file(s)** across **${analysis.categories.length} categor${analysis.categories.length === 1 ? 'y' : 'ies'}**.`);

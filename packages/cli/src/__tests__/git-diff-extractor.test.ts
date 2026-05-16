@@ -1,3 +1,4 @@
+
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { GitDiffExtractor } from '../git-diff-extractor';
 import simpleGit from 'simple-git';
@@ -243,5 +244,3 @@ describe('GitDiffExtractor', () => {
     });
   });
 });
-
-// Made with Bob

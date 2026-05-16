@@ -1,3 +1,4 @@
+
 import { SmartTruncator } from './smart-truncator';
 import { GitDiff, DiffFile } from '@pr-ready/shared';
 
@@ -182,5 +183,3 @@ async function runTests() {
 }
 
 runTests();
-
-// Made with Bob

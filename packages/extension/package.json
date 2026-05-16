@@ -1,68 +1,35 @@
 {
-  "name": "pr-ready",
+  "name": "pr-ready-vscode",
   "displayName": "PR Ready",
-  "description": "AI-powered PR analysis and review checklist generator",
+  "description": "Automated PR readiness analysis",
   "version": "0.1.0",
   "publisher": "pr-ready",
   "engines": {
-    "vscode": "^1.85.0"
+    "vscode": "^1.80.0"
   },
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [
-    "onStartupFinished",
-    "workspaceContains:.git"
-  ],
-  "main": "./out/extension.js",
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "prReady.analyze",
         "title": "PR Ready: Analyze Changes"
-      },
-      {
-        "command": "prReady.configure",
-        "title": "PR Ready: Configure"
       }
-    ],
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "prReady",
-          "title": "PR Ready",
-          "icon": "resources/pr-ready-icon.svg"
-        }
-      ]
-    },
-    "views": {
-      "prReady": [
-        {
-          "type": "webview",
-          "id": "prReady.prPanel",
-          "name": "PR Analysis"
-        }
-      ]
-    }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "build": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile",
-    "lint": "eslint src --ext ts"
-  },
-  "devDependencies": {
-    "@types/node": "^20.10.0",
-    "@types/vscode": "^1.85.0",
-    "@typescript-eslint/eslint-plugin": "^6.13.0",
-    "@typescript-eslint/parser": "^6.13.0",
-    "eslint": "^8.54.0",
-    "typescript": "^5.3.0"
+    "watch": "tsc -watch -p ./"
   },
   "dependencies": {
-    "@pr-ready/cli": "file:../cli",
-    "@pr-ready/shared": "file:../shared"
+    "@pr-ready/cli": "^0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.80.0",
+    "typescript": "^5.3.0"
   }
 }

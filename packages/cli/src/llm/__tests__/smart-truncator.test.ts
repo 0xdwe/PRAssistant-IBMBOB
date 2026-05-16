@@ -1,3 +1,4 @@
+
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { SmartTruncator } from '../smart-truncator';
 import { GitDiff, DiffFile } from '@pr-ready/shared';
@@ -303,5 +304,3 @@ describe('SmartTruncator', () => {
     });
   });
 });
-
-// Made with Bob

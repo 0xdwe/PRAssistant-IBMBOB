@@ -1,20 +1,23 @@
+
 import OpenAI from 'openai';
-import { GitDiff, LLMProvider, LLMAnalysis, LLMConfig } from '@pr-ready/shared';
+import { GitDiff, LLMProvider, LLMAnalysis, Config } from '@pr-ready/shared';
 
 export class OpenAIProvider implements LLMProvider {
   private client: OpenAI;
   private model: string;
   private timeout: number;
+  private config: Config;
 
-  constructor(config: LLMConfig) {
+  constructor(config: Config) {
+    this.config = config;
     // Initialize OpenAI client with custom baseURL
-    const apiKey = config.apiKey || 'sk-no-key-required';
-    const baseURL = config.baseURL || 'https://rqhse4n.9router.com/v1';
+    const apiKey = config.llm?.apiKey || 'sk-no-key-required';
+    const baseURL = config.llm?.baseURL || 'https://rqhse4n.9router.com/v1';
     
     this.client = new OpenAI({
       baseURL: baseURL,
       apiKey: apiKey,
-      timeout: config.timeout || 30000,
+      timeout: 30000,
       dangerouslyAllowBrowser: true,
       defaultHeaders: {
         'User-Agent': 'PRAssistant/1.0',
@@ -23,11 +26,15 @@ export class OpenAIProvider implements LLMProvider {
       },
     });
     
-    this.model = config.model || 'gpt-4';
-    this.timeout = config.timeout || 30000;
+    this.model = config.llm?.model || 'gpt-4';
+    this.timeout = 30000;
     
     console.log(`[LLM] Initialized with baseURL: ${baseURL}, model: ${this.model}`);
     console.log(`[LLM] Using API key: ${apiKey.substring(0, 10)}...`);
+  }
+
+  isConfigured(): boolean {
+    return !!(this.config.llm?.apiKey || this.config.llm?.baseURL);
   }
 
   async analyze(diff: GitDiff): Promise<LLMAnalysis> {
@@ -132,7 +139,7 @@ SUGGESTIONS:
     
     let summary = '';
     const insights: string[] = [];
-    const suggestions: string[] = [];
+    const keyChanges: string[] = [];
     
     let currentSection: 'summary' | 'insights' | 'suggestions' | null = null;
 
@@ -151,7 +158,7 @@ SUGGESTIONS:
         if (currentSection === 'insights' && item) {
           insights.push(item);
         } else if (currentSection === 'suggestions' && item) {
-          suggestions.push(item);
+          keyChanges.push(item);
         }
       } else if (currentSection === 'summary' && trimmed) {
         summary += ' ' + trimmed;
@@ -169,7 +176,7 @@ SUGGESTIONS:
     return {
       summary: summary || 'Changes analyzed',
       insights,
-      suggestions: suggestions.length > 0 ? suggestions : undefined,
+      keyChanges,
     };
   }
 
@@ -181,5 +188,3 @@ SUGGESTIONS:
     });
   }
 }
-
-// Made with Bob

@@ -1,3 +1,4 @@
+
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import clipboardy from 'clipboardy';
@@ -39,5 +40,3 @@ export class OutputHandler {
     await clipboardy.write(content);
   }
 }
-
-// Made with Bob

@@ -1,3 +1,4 @@
+
 import { readFile, access } from 'fs/promises';
 import { join, relative, dirname } from 'path';
 import { MonorepoDetection, MonorepoPackage, Config } from '@pr-ready/shared';
@@ -231,5 +232,3 @@ export class MonorepoDetector {
     return packages;
   }
 }
-
-// Made with Bob

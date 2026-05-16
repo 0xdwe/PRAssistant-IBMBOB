@@ -1,3 +1,4 @@
+
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { Config } from '@pr-ready/shared';
@@ -100,5 +101,3 @@ export class ConfigManager {
     }
   }
 }
-
-// Made with Bob

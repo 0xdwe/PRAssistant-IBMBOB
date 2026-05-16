@@ -1,3 +1,4 @@
+
 import { OllamaProvider } from './ollama-provider';
 import { GitDiff } from '@pr-ready/shared';
 
@@ -168,5 +169,3 @@ testOllamaProvider()
     console.error('Unexpected error:', error);
     process.exit(1);
   });
-
-// Made with Bob
