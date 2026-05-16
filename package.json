@@ -9,10 +9,18 @@
   "scripts": {
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces",
+    "test:watch": "npm run test:watch -w @pr-ready/cli",
+    "test:coverage": "jest --coverage",
     "dev": "npm run dev -w @pr-ready/cli"
   },
   "devDependencies": {
+    "@jest/globals": "^30.4.1",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20.0.0",
+    "jest": "^30.4.2",
+    "memfs": "^4.57.2",
+    "nock": "^14.0.15",
+    "ts-jest": "^29.4.9",
     "typescript": "^5.3.0"
   },
   "engines": {

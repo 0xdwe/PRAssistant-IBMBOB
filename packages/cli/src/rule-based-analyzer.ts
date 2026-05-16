@@ -171,7 +171,7 @@ export class RuleBasedAnalyzer {
     const path = filePath.toLowerCase();
 
     // High risk: Database migrations
-    if (path.includes('/migrations/') || path.includes('/schema/')) {
+    if (path.includes('migrations/') || path.includes('schema/') || path.includes('/migrations/') || path.includes('/schema/')) {
       risks.push({
         level: 'high',
         file: filePath,
