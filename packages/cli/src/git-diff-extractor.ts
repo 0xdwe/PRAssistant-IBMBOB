@@ -9,6 +9,11 @@ export class GitDiffExtractor {
   }
 
   async extractDiff(options: DiffOptions = {}): Promise<GitDiff> {
+    // If cwd is provided in options, reinitialize git with the new directory
+    if (options.cwd) {
+      this.git = simpleGit(options.cwd);
+    }
+    
     // Verify we're in a git repository
     const isRepo = await this.git.checkIsRepo();
     if (!isRepo) {

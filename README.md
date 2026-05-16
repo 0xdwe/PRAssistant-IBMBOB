@@ -2,6 +2,8 @@
 
 Automated PR readiness analysis tool that generates comprehensive PR packets from git diffs.
 
+<!-- Test for extension -->
+
 ## Features
 
 ✅ **Automatic Git Diff Analysis** - Extracts and analyzes changes between branches  
