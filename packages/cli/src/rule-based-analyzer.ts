@@ -171,7 +171,7 @@ export class RuleBasedAnalyzer {
     const path = filePath.toLowerCase();
 
     // High risk: Database migrations
-    if (path.includes('/migrations/') || path.includes('/schema/')) {
+    if (path.includes('migrations/') || path.includes('schema/')) {
       risks.push({
         level: 'high',
         file: filePath,
@@ -181,7 +181,7 @@ export class RuleBasedAnalyzer {
     }
 
     // High risk: Authentication/security
-    if (path.includes('/auth/') || path.includes('/security/') || path.includes('authentication')) {
+    if (path.includes('auth') || path.includes('security') || path.includes('authentication')) {
       risks.push({
         level: 'high',
         file: filePath,
@@ -235,7 +235,7 @@ export class RuleBasedAnalyzer {
     }
 
     // Low risk: API routes
-    if (path.includes('/api/') || path.includes('/routes/')) {
+    if (path.includes('api/') || path.includes('routes/')) {
       risks.push({
         level: 'low',
         file: filePath,

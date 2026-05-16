@@ -1,21 +1,21 @@
-import OpenAI from 'openai';
+import Anthropic from '@anthropic-ai/sdk';
 import { GitDiff, LLMProvider, LLMAnalysis } from '@pr-ready/shared';
 import { SmartTruncator } from './smart-truncator';
 
-export class OpenAIProvider implements LLMProvider {
-  private client: OpenAI | null = null;
+export class AnthropicProvider implements LLMProvider {
+  private client: Anthropic | null = null;
   private model: string;
   private apiKey: string | undefined;
   private timeout: number = 30000; // 30 seconds
   private truncator: SmartTruncator;
 
-  constructor(apiKey?: string, model: string = 'gpt-4') {
-    this.apiKey = apiKey || process.env.OPENAI_API_KEY;
+  constructor(apiKey?: string, model: string = 'claude-3-sonnet-20240229') {
+    this.apiKey = apiKey || process.env.ANTHROPIC_API_KEY;
     this.model = model;
     this.truncator = new SmartTruncator({ maxTokens: 100000 });
 
     if (this.apiKey) {
-      this.client = new OpenAI({
+      this.client = new Anthropic({
         apiKey: this.apiKey,
         timeout: this.timeout,
       });
@@ -28,7 +28,7 @@ export class OpenAIProvider implements LLMProvider {
 
   async analyze(diff: GitDiff): Promise<LLMAnalysis> {
     if (!this.isConfigured()) {
-      throw new Error('OpenAI provider is not configured. Set OPENAI_API_KEY environment variable or provide API key in config.');
+      throw new Error('Anthropic provider is not configured. Set ANTHROPIC_API_KEY environment variable or provide API key in config.');
     }
 
     try {
@@ -42,28 +42,25 @@ export class OpenAIProvider implements LLMProvider {
 
       const prompt = this.buildPrompt(truncationResult.diff);
       
-      const completion = await this.client!.chat.completions.create({
+      const message = await this.client!.messages.create({
         model: this.model,
+        max_tokens: 1000,
+        temperature: 0.3,
         messages: [
-          {
-            role: 'system',
-            content: 'You are a senior software engineer reviewing code changes. Provide concise, actionable insights about the changes.'
-          },
           {
             role: 'user',
             content: prompt
           }
         ],
-        temperature: 0.3,
-        max_tokens: 1000,
+        system: 'You are a senior software engineer reviewing code changes. Provide concise, actionable insights about the changes.'
       });
 
-      const response = completion.choices[0]?.message?.content;
-      if (!response) {
-        throw new Error('No response from OpenAI API');
+      const response = message.content[0];
+      if (response.type !== 'text' || !response.text) {
+        throw new Error('No response from Anthropic API');
       }
 
-      return this.parseResponse(response);
+      return this.parseResponse(response.text);
     } catch (error: any) {
       return this.handleError(error);
     }
@@ -166,25 +163,25 @@ CHECKLIST:
   }
 
   private handleError(error: any): never {
-    // Handle specific OpenAI errors
+    // Handle specific Anthropic errors
     if (error.status === 401) {
-      throw new Error('Invalid OpenAI API key. Please check your OPENAI_API_KEY environment variable or config.');
+      throw new Error('Invalid Anthropic API key. Please check your ANTHROPIC_API_KEY environment variable or config.');
     }
     
     if (error.status === 429) {
-      throw new Error('OpenAI API rate limit exceeded. Please try again later or upgrade your plan.');
+      throw new Error('Anthropic API rate limit exceeded. Please try again later or upgrade your plan.');
     }
     
     if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
-      throw new Error('Network error: Unable to connect to OpenAI API. Please check your internet connection.');
+      throw new Error('Network error: Unable to connect to Anthropic API. Please check your internet connection.');
     }
     
     if (error.code === 'ETIMEDOUT' || error.message?.includes('timeout')) {
-      throw new Error('OpenAI API request timed out after 30 seconds. Please try again.');
+      throw new Error('Anthropic API request timed out after 30 seconds. Please try again.');
     }
 
     // Generic error
-    throw new Error(`OpenAI API error: ${error.message || 'Unknown error'}`);
+    throw new Error(`Anthropic API error: ${error.message || 'Unknown error'}`);
   }
 }
 

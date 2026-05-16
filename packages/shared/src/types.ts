@@ -86,6 +86,7 @@ export interface Config {
     provider?: 'openai' | 'anthropic' | 'ollama' | 'none';
     apiKey?: string;
     model?: string;
+    endpoint?: string; // For Ollama custom endpoint
   };
   test?: {
     command?: string;
@@ -121,11 +122,17 @@ export interface LLMAnalysis {
   insights: string[];
   keyChanges: string[];
   suggestedReviewers?: string[];
+  checklistItems?: string[]; // 2-4 context-specific checklist items
 }
 
 export interface LLMProvider {
   analyze(diff: GitDiff): Promise<LLMAnalysis>;
   isConfigured(): boolean;
+}
+
+export interface HybridAnalysis extends RuleAnalysis {
+  llmAnalysis?: LLMAnalysis;
+  llmError?: string;
 }
 
 export interface MonorepoPackage {

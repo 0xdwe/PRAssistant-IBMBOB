@@ -3,7 +3,7 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { GitDiffExtractor } from './git-diff-extractor';
-import { RuleBasedAnalyzer } from './rule-based-analyzer';
+import { HybridAnalyzer } from './hybrid-analyzer';
 import { PRPacketGenerator } from './pr-packet-generator';
 import { OutputHandler } from './output-handler';
 import { ConfigManager } from './config-manager';
@@ -15,16 +15,33 @@ const program = new Command();
 
 program
   .name('pr-ready')
-  .description('Automated PR readiness analysis tool')
+  .description('Automated PR readiness analysis tool - Generate comprehensive PR packets from git diffs')
   .version('0.1.0')
-  .option('--base <branch>', 'Base branch to compare against (default: auto-detect)')
-  .option('--head <branch>', 'Head branch with changes (default: current)')
-  .option('--llm <provider>', 'LLM provider: openai|anthropic|ollama|none (default: none)')
-  .option('--test', 'Run tests and include results')
-  .option('--no-cache', 'Skip cache lookup')
-  .option('--config <path>', 'Custom config file path')
-  .option('--output <path>', 'Custom output file path')
-  .option('--no-clipboard', 'Skip clipboard copy')
+  .option('--base <branch>', 'Base branch to compare against (default: auto-detect from upstream/origin)')
+  .option('--head <branch>', 'Head branch with changes (default: current branch)')
+  .option('--llm <provider>', 'LLM provider for enhanced analysis: openai|anthropic|ollama|none (default: none)')
+  .option('--test', 'Run tests before generating PR packet and include test results')
+  .option('--no-cache', 'Skip cache lookup and force fresh analysis')
+  .option('--config <path>', 'Path to custom config file (.pr-ready.json or package.json)')
+  .option('--output <path>', 'Custom output file path (default: .pr-ready.md)')
+  .option('--no-clipboard', 'Skip automatic clipboard copy of the generated PR packet')
+  .addHelpText('after', `
+Examples:
+  $ pr-ready                              # Analyze current branch
+  $ pr-ready --base main --head feature   # Compare specific branches
+  $ pr-ready --test                       # Run tests and include results
+  $ pr-ready --llm openai                 # Use OpenAI for enhanced analysis
+  $ pr-ready --output my-pr.md            # Custom output file
+  $ pr-ready --no-clipboard               # Don't copy to clipboard
+
+Configuration:
+  Create .pr-ready.json or add "prReady" section to package.json
+  See examples/ directory for sample configurations
+
+Documentation:
+  Full documentation: https://github.com/yourusername/pr-ready
+  Issues & support: https://github.com/yourusername/pr-ready/issues
+`)
   .action(async (options) => {
     try {
       console.log(chalk.blue('🔍 Analyzing PR readiness...\n'));
@@ -52,14 +69,23 @@ program
 
       console.log(chalk.green(`✓ Found ${diff.files.length} changed file(s)\n`));
 
-      // Analyze with rule-based analyzer
+      // Analyze with hybrid analyzer (rule-based + optional LLM)
       console.log(chalk.gray('Analyzing changes...'));
-      const analyzer = new RuleBasedAnalyzer();
-      const analysis = analyzer.analyze(diff);
+      const useCache = options.cache !== false; // --no-cache sets cache to false
+      const analyzer = new HybridAnalyzer(config, useCache);
+      const analysis = await analyzer.analyze(diff);
 
       console.log(chalk.green(`✓ Categorized into ${analysis.categories.length} categories`));
       console.log(chalk.green(`✓ Detected ${analysis.testDetection.testFiles.length} test file(s)`));
-      console.log(chalk.green(`✓ Found ${analysis.risks.length} risk flag(s)\n`));
+      console.log(chalk.green(`✓ Found ${analysis.risks.length} risk flag(s)`));
+      
+      if (analysis.llmAnalysis) {
+        console.log(chalk.green(`✓ LLM analysis included\n`));
+      } else if (analysis.llmError) {
+        console.log(chalk.yellow(`⚠️  LLM analysis failed: ${analysis.llmError}\n`));
+      } else {
+        console.log(chalk.gray('(LLM analysis not enabled)\n'));
+      }
 
       // Detect monorepo structure
       console.log(chalk.gray('Detecting monorepo structure...'));
@@ -105,7 +131,7 @@ program
       console.log(chalk.gray('Generating PR packet...'));
       const generator = new PRPacketGenerator();
       const packet = generator.generate(diff, analysis, testResults, monorepoDetection);
-      const markdown = generator.generateMarkdown(packet);
+      const markdown = generator.generateMarkdown(packet, analysis);
 
       console.log(chalk.green('✓ PR packet generated\n'));
 
