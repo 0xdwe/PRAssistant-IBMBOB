@@ -50,9 +50,14 @@ export interface PRPacket {
   summary: string;
   filesChanged: FileCategory[];
   testStatus: TestDetection;
+  testResults?: TestResult;
   risks: RiskFlag[];
   checklist: string[];
+<<<<<<< HEAD
   llmAnalysis?: LLMAnalysis;
+=======
+  monorepo?: MonorepoDetection;
+>>>>>>> ca3a4f3 (feat: implement monorepo detection (issue 014))
   metadata: {
     baseBranch: string;
     headBranch: string;
@@ -90,6 +95,7 @@ export interface Config {
   test?: {
     command?: string;
     patterns?: string[];
+    timeout?: number; // in milliseconds, default 300000 (5 min)
   };
   risks?: {
     patterns?: string[];
@@ -104,14 +110,34 @@ export interface Config {
   };
 }
 
+<<<<<<< HEAD
 export interface LLMAnalysis {
   summary: string;
   insights: string[];
   suggestions?: string[];
+=======
+export interface TestResult {
+  passed: boolean;
+  totalTests: number;
+  passedTests: number;
+  failedTests: number;
+  skippedTests?: number;
+  duration: number; // in milliseconds
+  output: string;
+  error?: string;
+}
+
+export interface LLMAnalysis {
+  summary: string;
+  insights: string[];
+  keyChanges: string[];
+  suggestedReviewers?: string[];
+>>>>>>> ca3a4f3 (feat: implement monorepo detection (issue 014))
 }
 
 export interface LLMProvider {
   analyze(diff: GitDiff): Promise<LLMAnalysis>;
+<<<<<<< HEAD
 }
 
 export interface LLMConfig {
@@ -120,6 +146,22 @@ export interface LLMConfig {
   apiKey?: string;
   model?: string;
   timeout?: number;
+=======
+  isConfigured(): boolean;
+}
+
+export interface MonorepoPackage {
+  name: string;
+  path: string;
+  packageJson?: any;
+}
+
+export interface MonorepoDetection {
+  isMonorepo: boolean;
+  type?: 'npm-workspaces' | 'lerna' | 'nx' | 'pnpm' | 'yarn';
+  packages: MonorepoPackage[];
+  affectedPackages: string[];
+>>>>>>> ca3a4f3 (feat: implement monorepo detection (issue 014))
 }
 
 // Made with Bob

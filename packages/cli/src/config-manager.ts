@@ -10,6 +10,7 @@ export class ConfigManager {
     test: {
       command: 'npm test',
       patterns: ['*.test.ts', '*.spec.ts', '*.test.js', '*.spec.js', '__tests__/'],
+      timeout: 300000, // 5 minutes
     },
     risks: {
       patterns: [
