@@ -1,0 +1,21 @@
+{
+  "name": "pr-readiness-assistant",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Automated PR readiness analysis tool",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "dev": "npm run dev -w @pr-ready/cli"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
