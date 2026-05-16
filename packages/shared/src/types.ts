@@ -52,6 +52,7 @@ export interface PRPacket {
   testStatus: TestDetection;
   risks: RiskFlag[];
   checklist: string[];
+  llmAnalysis?: LLMAnalysis;
   metadata: {
     baseBranch: string;
     headBranch: string;
@@ -82,6 +83,7 @@ export interface OutputOptions {
 export interface Config {
   llm?: {
     provider?: 'openai' | 'anthropic' | 'ollama' | 'none';
+    baseURL?: string;
     apiKey?: string;
     model?: string;
   };
@@ -100,6 +102,24 @@ export interface Config {
     enabled?: boolean;
     packages?: string[];
   };
+}
+
+export interface LLMAnalysis {
+  summary: string;
+  insights: string[];
+  suggestions?: string[];
+}
+
+export interface LLMProvider {
+  analyze(diff: GitDiff): Promise<LLMAnalysis>;
+}
+
+export interface LLMConfig {
+  provider: 'openai' | 'anthropic' | 'ollama' | 'none';
+  baseURL?: string;
+  apiKey?: string;
+  model?: string;
+  timeout?: number;
 }
 
 // Made with Bob

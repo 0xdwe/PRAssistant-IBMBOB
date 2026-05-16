@@ -1,0 +1,8 @@
+{
+  "llm": {
+    "provider": "openai",
+    "baseURL": "http://172.16.6.27:20128/v1",
+    "model": "kr/claude-sonnet-4.5",
+    "apiKey": "sk-19d8880ef9d5cdc5-9r6vgy-a9b2b4cd"
+  }
+}
