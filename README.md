@@ -7,7 +7,7 @@
 
 ## 🚀 Features
 
-- **🔍 Automatic Git Diff Analysis** - Extracts and analyzes changes between branches
+- **🔍 Automatic Git Diff Analysis** - Extracts and analyzes changes between branches or uncommitted changes
 - **📁 Smart File Categorization** - Groups files by purpose (frontend, backend, tests, config, docs)
 - **🧪 Test Detection** - Identifies test files and warns if tests are missing
 - **⚠️ Risk Assessment** - Flags high-risk changes (DB migrations, auth, dependencies)
@@ -16,6 +16,7 @@
 - **🧠 LLM Integration** - Optional AI-powered analysis (OpenAI, Anthropic, Ollama)
 - **🏢 Monorepo Support** - Detects and tracks changes across multiple packages
 - **✅ Test Execution** - Runs tests and includes results in PR packet
+- **🎨 VSCode Extension** - Analyze changes directly from your editor
 - **⚙️ Highly Configurable** - Customize via `.pr-ready.json` or `package.json`
 
 ## 📦 Installation
@@ -45,8 +46,10 @@ npm link -w @pr-ready/cli
 
 ## 🎯 Quick Start
 
+### CLI Usage
+
 ```bash
-# Analyze current branch against auto-detected base
+# Analyze uncommitted changes
 pr-ready
 
 # Compare specific branches
@@ -58,6 +61,14 @@ pr-ready --test
 # Use LLM for enhanced analysis
 pr-ready --llm openai
 ```
+
+### VSCode Extension
+
+1. Open the project in VSCode
+2. Press `F5` to launch Extension Development Host
+3. In the new window, open a git repository
+4. Press `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Windows/Linux)
+5. Type "PR Ready: Analyze Changes" and press Enter
 
 ## 📖 Usage
 
@@ -82,8 +93,11 @@ Options:
 ### Examples
 
 ```bash
-# Basic analysis
+# Analyze uncommitted changes
 pr-ready
+
+# Compare branches
+pr-ready --base main --head feature-branch
 
 # With tests
 pr-ready --test
@@ -103,16 +117,14 @@ Create `.pr-ready.json` in project root:
 ```json
 {
   "llm": {
-    "provider": "none",
+    "provider": "openai",
     "apiKey": "${OPENAI_API_KEY}",
     "model": "gpt-4",
-    "temperature": 0.3,
-    "maxTokens": 2000
+    "baseURL": "https://api.openai.com/v1"
   },
   "monorepo": {
     "enabled": true,
-    "type": "auto",
-    "packagePaths": ["packages/*", "apps/*"]
+    "packages": ["packages/*"]
   },
   "test": {
     "command": "npm test",
@@ -128,10 +140,6 @@ Create `.pr-ready.json` in project root:
   "output": {
     "file": ".pr-ready.md",
     "clipboard": true
-  },
-  "cache": {
-    "enabled": true,
-    "ttl": 3600
   }
 }
 ```
@@ -141,14 +149,12 @@ Create `.pr-ready.json` in project root:
 #### LLM Configuration
 - `provider`: `openai`, `anthropic`, `ollama`, or `none`
 - `apiKey`: API key (supports env vars: `${VAR_NAME}`)
-- `model`: Model name
-- `temperature`: 0.0-1.0
-- `maxTokens`: Max response tokens
+- `model`: Model name (e.g., `gpt-4`, `claude-3-opus`)
+- `baseURL`: API endpoint URL
 
 #### Monorepo Configuration
 - `enabled`: Enable monorepo detection
-- `type`: `auto`, `lerna`, `nx`, `pnpm`, `yarn`
-- `packagePaths`: Glob patterns for packages
+- `packages`: Glob patterns for packages
 
 #### Test Configuration
 - `command`: Test command (default: `npm test`)
@@ -156,27 +162,136 @@ Create `.pr-ready.json` in project root:
 
 #### Risk Configuration
 - `patterns`: Glob patterns for high-risk files
-- `customRules`: Custom risk detection rules
 
 #### Output Configuration
 - `file`: Output file path
 - `clipboard`: Copy to clipboard
 
-#### Cache Configuration
-- `enabled`: Enable caching
-- `ttl`: Cache TTL in seconds
-
 ## 📄 Output Format
 
 PR Ready generates markdown with:
 
-1. **Summary** - High-level overview
+1. **Summary** - High-level overview of changes
 2. **Change Details** - Branches, files, lines changed
-3. **Files Changed** - Categorized with emojis
-4. **Test Coverage** - Test detection and results
-5. **Risk Assessment** - Flagged changes by risk level
+3. **Files Changed** - Categorized with emojis (🎨 Frontend, ⚙️ Backend, 🧪 Tests, etc.)
+4. **Test Coverage** - Test detection and execution results
+5. **Risk Assessment** - Flagged changes by risk level (🔴 High, 🟡 Medium, 🟢 Low)
 6. **Monorepo Info** - Affected packages (if applicable)
 7. **Reviewer Checklist** - Context-specific review items
+
+### Example Output
+
+```markdown
+# PR Readiness Report
+
+## Summary
+This PR modifies 5 file(s) across 3 categories. Changes include: backend (3), tests (1), docs (1).
+
+## Change Details
+- **Base Branch**: `main`
+- **Head Branch**: `feature-branch`
+- **Files Changed**: 5
+- **Total Changes**: +127 lines
+
+## Files Changed
+### ⚙️ Backend (3)
+- `src/api/users.ts`
+- `src/services/auth.ts`
+- `src/models/user.ts`
+
+### 🧪 Tests (1)
+- `src/api/users.test.ts`
+
+### 📚 Documentation (1)
+- `README.md`
+
+## Test Coverage
+✅ **1 test file(s) modified**
+- `src/api/users.test.ts`
+
+## Risk Assessment
+### 🟡 Medium Risk
+- **`src/services/auth.ts`**: Authentication or security code modified
+
+## Reviewer Checklist
+- [ ] All tests pass locally
+- [ ] No breaking changes (or documented in PR description)
+- [ ] Security implications reviewed
+- [ ] Authentication flows tested
+- [ ] Changes are well-documented
+- [ ] Code follows project style guidelines
+```
+
+## 🏗️ Project Structure
+
+```
+PRAssistant-IBMBOB/
+├── packages/
+│   ├── cli/                    # CLI tool
+│   │   ├── src/
+│   │   │   ├── cli.ts                    # Main CLI entry point
+│   │   │   ├── git-diff-extractor.ts     # Git diff extraction
+│   │   │   ├── rule-based-analyzer.ts    # File categorization & risk detection
+│   │   │   ├── hybrid-analyzer.ts        # Combines rule-based + LLM analysis
+│   │   │   ├── pr-packet-generator.ts    # Markdown generation
+│   │   │   ├── config-manager.ts         # Configuration handling
+│   │   │   ├── test-executor.ts          # Test execution
+│   │   │   ├── monorepo-detector.ts      # Monorepo detection
+│   │   │   ├── cache-manager.ts          # LLM response caching
+│   │   │   ├── output-handler.ts         # File & clipboard output
+│   │   │   └── llm/                      # LLM providers
+│   │   │       ├── openai-provider.ts
+│   │   │       ├── anthropic-provider.ts
+│   │   │       ├── ollama-provider.ts
+│   │   │       └── smart-truncator.ts
+│   │   └── package.json
+│   ├── extension/              # VSCode extension
+│   │   ├── src/
+│   │   │   └── extension.ts
+│   │   └── package.json
+│   └── shared/                 # Shared types
+│       ├── src/types.ts
+│       └── package.json
+├── .vscode/
+│   └── launch.json            # VSCode debug configuration
+├── LICENSE
+├── README.md
+└── TESTING.md
+```
+
+## 🧪 Testing
+
+See [TESTING.md](TESTING.md) for detailed testing instructions.
+
+### Quick Test
+
+```bash
+# Build the project
+npm run build
+
+# Test CLI
+cd packages/cli
+npm test
+
+# Test VSCode extension
+# Open project in VSCode and press F5
+```
+
+## 🔧 Development
+
+```bash
+# Install dependencies
+npm install
+
+# Build all packages
+npm run build
+
+# Run tests
+npm test
+
+# Watch mode for development
+npm run dev
+```
 
 ## 🔧 Troubleshooting
 
@@ -187,50 +302,21 @@ pr-ready
 ```
 
 ### No changes detected
+The tool now detects uncommitted changes by default. If you want to compare branches:
 ```bash
-git branch
-git log --oneline -5
 pr-ready --base main --head your-branch
 ```
 
 ### Test execution failed
 ```bash
 npm test  # Verify test command works
-pr-ready --test --config .pr-ready.json
+pr-ready --test
 ```
 
 ### LLM API error
 ```bash
 export OPENAI_API_KEY=your-key
-echo $OPENAI_API_KEY
-```
-
-### Clipboard copy failed
-```bash
-pr-ready --no-clipboard
-```
-
-## 🏗️ Project Structure
-
-```
-PRAssistant-IBMBOB/
-├── packages/
-│   ├── cli/                    # CLI tool
-│   │   ├── src/
-│   │   │   ├── cli.ts
-│   │   │   ├── git-diff-extractor.ts
-│   │   │   ├── rule-based-analyzer.ts
-│   │   │   ├── pr-packet-generator.ts
-│   │   │   ├── config-manager.ts
-│   │   │   ├── test-executor.ts
-│   │   │   ├── monorepo-detector.ts
-│   │   │   └── llm/
-│   │   └── package.json
-│   └── shared/                 # Shared types
-│       ├── src/types.ts
-│       └── package.json
-├── LICENSE
-└── README.md
+pr-ready --llm openai
 ```
 
 ## 📝 License
@@ -239,11 +325,11 @@ MIT License - see [LICENSE](LICENSE) file.
 
 ## 🙏 Acknowledgments
 
-- [Commander.js](https://github.com/tj/commander.js/)
-- [Chalk](https://github.com/chalk/chalk)
-- [simple-git](https://github.com/steveukx/git-js)
-- [OpenAI Node SDK](https://github.com/openai/openai-node)
+- [Commander.js](https://github.com/tj/commander.js/) - CLI framework
+- [Chalk](https://github.com/chalk/chalk) - Terminal styling
+- [simple-git](https://github.com/steveukx/git-js) - Git operations
+- [OpenAI Node SDK](https://github.com/openai/openai-node) - LLM integration
 
 ---
 
-**Made with ❤️ by the PR Ready team**
+**Made with ❤️ for better code reviews**

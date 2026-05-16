@@ -1,4 +1,6 @@
-# Testing Guide for PR Ready VSCode Extension
+# Testing Guide
+
+This guide covers testing for both the CLI tool and VSCode extension.
 
 ## Prerequisites
 
@@ -8,129 +10,310 @@
 
 ## Setup
 
-1. **Install dependencies:**
+```bash
+# Install dependencies
+npm install
+
+# Build all packages
+npm run build
+```
+
+## Testing the CLI
+
+### Basic Tests
+
+```bash
+# Run unit tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+### Manual CLI Testing
+
+```bash
+# Test with uncommitted changes
+echo "test" >> test.txt
+pr-ready
+
+# Test with branch comparison
+git checkout -b test-branch
+echo "test" >> test.txt
+git add test.txt
+git commit -m "test"
+pr-ready --base main --head test-branch
+
+# Test with LLM (requires API key)
+export OPENAI_API_KEY=your-key
+pr-ready --llm openai
+
+# Test with test execution
+pr-ready --test
+
+# Test with custom output
+pr-ready --output custom.md --no-clipboard
+```
+
+## Testing the VSCode Extension
+
+### Method 1: Debug Mode (Recommended)
+
+1. **Open the project in VSCode**
    ```bash
-   npm install
-   npm run build
+   code .
    ```
 
-2. **Build the extension:**
-   ```bash
-   cd packages/extension
-   npm run compile
-   ```
+2. **Start debugging:**
+   - Press `F5` or go to Run > Start Debugging
+   - Select "Run Extension" from the dropdown
+   - A new VSCode window opens with the extension loaded
 
-## Testing the Extension
-
-### Method 1: Run in Development Mode
-
-1. **Open extension in VSCode:**
-   ```bash
-   code packages/extension
-   ```
-
-2. **Press F5** or go to **Run > Start Debugging**
-   - This opens a new VSCode window with the extension loaded
-
-3. **In the new window:**
-   - Open a git repository
+3. **Test the extension:**
+   - In the Extension Development Host window, open a git repository
+   - Make some changes to files (or have uncommitted changes)
    - Press `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Windows/Linux)
    - Type "PR Ready: Analyze Changes"
    - Press Enter
 
 4. **Expected behavior:**
-   - Progress notification appears
+   - Progress notification: "Extracting git diff..."
+   - Progress notification: "Analyzing changes..."
+   - Progress notification: "Generating PR packet..."
    - Markdown document opens with PR analysis
-   - Content copied to clipboard
-   - Success message shows file count
+   - Content is copied to clipboard
+   - Success message: "PR analysis complete: X files changed"
 
 ### Method 2: Install as VSIX
 
-1. **Package the extension:**
-   ```bash
-   cd packages/extension
-   npm install -g @vscode/vsce
-   vsce package
-   ```
+```bash
+# Install vsce globally
+npm install -g @vscode/vsce
 
-2. **Install the .vsix file:**
-   - In VSCode: Extensions view (Cmd+Shift+X)
-   - Click "..." menu → "Install from VSIX..."
-   - Select `pr-ready-vscode-0.1.0.vsix`
+# Package the extension
+cd packages/extension
+vsce package
 
-3. **Test as in Method 1, step 3-4**
+# Install in VSCode
+# Extensions view (Cmd+Shift+X) > "..." menu > "Install from VSIX..."
+# Select pr-ready-vscode-0.1.0.vsix
+```
 
 ## Test Scenarios
 
-### Scenario 1: Basic Analysis
+### Scenario 1: Uncommitted Changes (Default)
+
 ```bash
-# Create test changes
+# Make some changes without committing
+echo "# Test" >> README.md
+echo "console.log('test');" >> src/test.ts
+```
+
+**Run:** PR Ready: Analyze Changes
+
+**Expected:**
+- Detects uncommitted changes
+- Shows "HEAD" vs "Working Directory"
+- Lists all modified files
+
+### Scenario 2: Branch Comparison
+
+```bash
+# Create and commit changes
+git checkout -b feature-branch
 echo "test" >> test.txt
 git add test.txt
+git commit -m "Add test file"
 ```
-Run command → Should show 1 file changed
 
-### Scenario 2: No Changes
+**Run:** `pr-ready --base main --head feature-branch`
+
+**Expected:**
+- Compares branches
+- Shows committed changes only
+
+### Scenario 3: No Changes
+
 ```bash
 # Ensure clean working directory
-git status
+git status  # Should show "nothing to commit"
 ```
-Run command → Should show "No changes detected"
 
-### Scenario 3: Multiple File Types
+**Run:** PR Ready: Analyze Changes
+
+**Expected:**
+- Error message: "No uncommitted changes found"
+
+### Scenario 4: Multiple File Types
+
 ```bash
-# Create various files
-touch src/app.ts src/app.test.ts README.md
+# Create various file types
+touch src/app.ts
+touch src/app.test.ts
+touch README.md
+touch .env
 git add .
 ```
-Run command → Should categorize files correctly
 
-### Scenario 4: Error Handling
-- Run in non-git directory → Should show error
-- Run with no workspace → Should show error
+**Run:** PR Ready: Analyze Changes
+
+**Expected:**
+- Files categorized correctly:
+  - Backend: src/app.ts
+  - Tests: src/app.test.ts
+  - Docs: README.md
+  - Config: .env
+
+### Scenario 5: High-Risk Files
+
+```bash
+# Create high-risk files
+mkdir -p migrations
+echo "ALTER TABLE users..." >> migrations/001_add_column.sql
+touch src/auth/login.ts
+git add .
+```
+
+**Run:** PR Ready: Analyze Changes
+
+**Expected:**
+- Risk assessment shows:
+  - 🔴 High Risk: migrations/001_add_column.sql (Database schema change)
+  - 🔴 High Risk: src/auth/login.ts (Authentication code)
+
+### Scenario 6: Test Detection
+
+```bash
+# Modify source without tests
+echo "function add() {}" >> src/math.ts
+git add src/math.ts
+```
+
+**Run:** PR Ready: Analyze Changes
+
+**Expected:**
+- Warning: "No test files modified despite source code changes"
+
+```bash
+# Add corresponding test
+echo "test('add', () => {})" >> src/math.test.ts
+git add src/math.test.ts
+```
+
+**Run:** PR Ready: Analyze Changes
+
+**Expected:**
+- ✅ Test files detected: 1
 
 ## Troubleshooting
 
-### Extension not activating
-- Check VSCode output panel: View > Output > PR Ready
-- Verify extension installed: Extensions view
+### Extension Not Activating
 
-### Command not found
-- Reload window: Cmd+Shift+P → "Reload Window"
-- Check package.json contributes.commands
+**Check:**
+- VSCode Output panel: View > Output > PR Ready
+- Extension installed: Extensions view
+- Console errors: Help > Toggle Developer Tools
 
-### Import errors
+**Fix:**
 ```bash
+# Rebuild extension
 cd packages/extension
-npm install
-npm run compile
+npm run build
+
+# Reload VSCode
+Cmd+Shift+P > "Developer: Reload Window"
 ```
 
-### TypeScript errors
+### Command Not Found
+
+**Fix:**
 ```bash
-# Rebuild CLI first
+# Reload window
+Cmd+Shift+P > "Reload Window"
+
+# Or restart VSCode
+```
+
+### Import Errors
+
+**Fix:**
+```bash
+# Rebuild all packages
+npm run build
+
+# Specifically rebuild CLI (extension depends on it)
 cd packages/cli
 npm run build
 
 # Then rebuild extension
 cd ../extension
-npm run compile
+npm run build
 ```
+
+### Git Errors
+
+**Check:**
+- You're in a git repository: `git status`
+- Git is installed: `git --version`
+- Repository has commits: `git log`
+
+### No Changes Detected
+
+**Possible causes:**
+1. No uncommitted changes and no branch specified
+2. Comparing identical branches
+3. All changes are in ignored files (.gitignore)
+
+**Fix:**
+- Make some changes: `echo "test" >> test.txt`
+- Or specify branches: `pr-ready --base main --head feature`
 
 ## Verification Checklist
 
+### CLI
+- [ ] Detects uncommitted changes
+- [ ] Compares branches correctly
+- [ ] Categorizes files properly
+- [ ] Detects test files
+- [ ] Identifies high-risk changes
+- [ ] Generates markdown output
+- [ ] Copies to clipboard
+- [ ] Handles errors gracefully
+- [ ] Works with monorepos
+- [ ] Executes tests (with --test flag)
+- [ ] Integrates with LLM (with --llm flag)
+
+### VSCode Extension
 - [ ] Extension activates on startup
 - [ ] Command appears in command palette
-- [ ] Analyzes git changes correctly
+- [ ] Analyzes uncommitted changes
 - [ ] Opens markdown document
 - [ ] Copies to clipboard
 - [ ] Shows progress notifications
 - [ ] Handles errors gracefully
 - [ ] Works with no changes
-- [ ] Categorizes files correctly
-- [ ] Detects test files
+- [ ] Works in different workspaces
 
 ## Debug Tips
+
+### CLI Debugging
+
+```bash
+# Enable verbose logging
+DEBUG=pr-ready:* pr-ready
+
+# Check git status
+git status
+git diff HEAD
+
+# Test git diff extraction directly
+node -e "const {GitDiffExtractor} = require('./packages/cli/dist/git-diff-extractor'); new GitDiffExtractor().extractDiff().then(console.log)"
+```
+
+### Extension Debugging
 
 1. **View logs:**
    - Help > Toggle Developer Tools
@@ -140,11 +323,27 @@ npm run compile
    - View > Output > Extension Host
 
 3. **Reload extension:**
-   - Cmd+Shift+P → "Developer: Reload Window"
+   - Cmd+Shift+P > "Developer: Reload Window"
 
-4. **Uninstall/reinstall:**
-   - Extensions view → Right-click → Uninstall
-   - Reinstall from VSIX or F5
+4. **Set breakpoints:**
+   - Open `packages/extension/src/extension.ts`
+   - Click left margin to set breakpoints
+   - Press F5 to debug
+
+## Performance Testing
+
+```bash
+# Test with large diff
+git diff HEAD~10 HEAD
+
+# Test with many files
+for i in {1..100}; do echo "test" >> "file$i.txt"; done
+git add .
+pr-ready
+
+# Clean up
+rm file*.txt
+```
 
 ## Expected Output Example
 
@@ -152,23 +351,47 @@ npm run compile
 # PR Readiness Report
 
 ## Summary
-This PR modifies 3 file(s) across 2 categories.
+This PR modifies 3 file(s) across 2 categories. Changes include: backend (2), tests (1).
+
+## Change Details
+- **Base Branch**: `HEAD`
+- **Head Branch**: `Working Directory`
+- **Files Changed**: 3
+- **Total Changes**: +35 lines
 
 ## Files Changed
-### ⚙️ Backend (1)
-- src/app.ts (+10, -2)
+### ⚙️ Backend (2)
+- `src/app.ts`
+- `src/utils.ts`
 
 ### 🧪 Tests (1)
-- src/app.test.ts (+25, -0)
-
-### 📚 Documentation (1)
-- README.md (+5, -1)
+- `src/app.test.ts`
 
 ## Test Coverage
-✅ Test files detected: 1
-✅ All modified source files have tests
+✅ **1 test file(s) modified**
+- `src/app.test.ts`
+
+## Risk Assessment
+✅ No high-risk changes detected
 
 ## Reviewer Checklist
-- [ ] Code changes reviewed
-- [ ] Tests are adequate
-- [ ] Documentation updated
+- [ ] All tests pass locally
+- [ ] No breaking changes (or documented in PR description)
+- [ ] New tests cover edge cases
+- [ ] Changes are well-documented
+- [ ] Code follows project style guidelines
+- [ ] No unnecessary console.log or debug code
+```
+
+## Continuous Integration
+
+The project uses GitHub Actions for CI. Tests run automatically on:
+- Push to main
+- Pull requests
+- Manual workflow dispatch
+
+See `.github/workflows/` for CI configuration.
+
+---
+
+For more information, see [README.md](README.md)
